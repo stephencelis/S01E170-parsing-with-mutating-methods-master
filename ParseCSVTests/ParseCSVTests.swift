@@ -96,21 +96,22 @@ public extension Character {
     }
 }
 
+let plainFieldParser: Parser<String> = .characters(until: .firstLiteral(",", "\n", as: ()))
+let quotedFieldParser: Parser<String> =
+    zip(
+        .literal("\""),
+        .characters(until: .literal("\"")),
+        .literal("\"")
+    )
+    .map {
+        $0.1
+    }
+let fieldParser: Parser<String> = .first(quotedFieldParser, plainFieldParser)
+let lineParser: Parser<[String]> = .delimitedZeroOrMore(fieldParser)
+let csvParser: Parser<[[String]]> = .zeroOrMore(lineParser, delimiter: .literal("\n"))
+
 extension String {
     func parseWithCombinators() -> [[String]] {
-        let plainFieldParser: Parser<String> = .characters(until: .firstLiteral(",", "\n", as: ()))
-        let quotedFieldParser: Parser<String> =
-            zip(
-                .literal("\""),
-                .characters(until: .literal("\"")),
-                .literal("\"")
-            )
-            .map {
-                $0.1
-            }
-        let fieldParser: Parser<String> = .first(quotedFieldParser, plainFieldParser)
-        let lineParser: Parser<[String]> = .delimitedZeroOrMore(fieldParser)
-        let csvParser: Parser<[[String]]> = .zeroOrMore(lineParser, delimiter: .literal("\n"))
         return csvParser.run(self) ?? [[]]
     }
 }

@@ -6,6 +6,7 @@
 //  Copyright © 2019 Ilya Belenkiy. All rights reserved.
 //
 
+@inline(__always)
 public func zip<A, B>(_ a: Parser<A>, _ b: Parser<B>) -> Parser<(A, B)> {
     return Parser { str in
         let original = str
@@ -18,6 +19,7 @@ public func zip<A, B>(_ a: Parser<A>, _ b: Parser<B>) -> Parser<(A, B)> {
     }
 }
 
+@inline(__always)
 public func zip<A, B, C>(
     _ a: Parser<A>,
     _ b: Parser<B>,
@@ -27,6 +29,7 @@ public func zip<A, B, C>(
         .map { a, bc in (a, bc.0, bc.1) }
 }
 
+@inline(__always)
 public func zip<A, B, C, D>(
     _ a: Parser<A>,
     _ b: Parser<B>,
@@ -37,6 +40,7 @@ public func zip<A, B, C, D>(
         .map { a, bcd in (a, bcd.0, bcd.1, bcd.2) }
 }
 
+@inline(__always)
 public func zip<A, B, C, D, E>(
     _ a: Parser<A>,
     _ b: Parser<B>,
@@ -49,6 +53,7 @@ public func zip<A, B, C, D, E>(
         .map { a, bcde in (a, bcde.0, bcde.1, bcde.2, bcde.3) }
 }
 
+@inline(__always)
 public func zip<A, B, C, D, E, F>(
     _ a: Parser<A>,
     _ b: Parser<B>,
@@ -61,6 +66,7 @@ public func zip<A, B, C, D, E, F>(
         .map { a, bcdef in (a, bcdef.0, bcdef.1, bcdef.2, bcdef.3, bcdef.4) }
 }
 
+@inline(__always)
 public func zip<A, B, C, D, E, F, G>(
     _ a: Parser<A>,
     _ b: Parser<B>,
@@ -75,40 +81,49 @@ public func zip<A, B, C, D, E, F, G>(
 }
 
 public extension Parser {
+    @inline(__always)
     static func always(_ a: A) -> Parser {
         return Parser { _ in a }
     }
 
+    @inline(__always)
     static var never: Parser {
         return Parser { _ in nil }
     }
 
+    @inline(__always)
     static func literal(_ str: String, as match: A) -> Parser {
         return Parser<Void>.literal(str).map { _ in match }
     }
 
+    @inline(__always)
     static func firstLiteral(_ args: String..., as match: A) -> Parser {
         firstLiteral(args, as: match)
     }
 
+    @inline(__always)
     static func firstLiteral(_ args: [String], as match: A) -> Parser {
         first(args.map { Parser<Void>.literal($0) }).map { _ in match }
     }
 
+    @inline(__always)
     static func longestLiteral(_ args: String..., as match: A) -> Parser {
         longestLiteral(args, as: match)
     }
 
+    @inline(__always)
     static func longestLiteral(_ args: [String], as match: A) -> Parser {
         longest(args.map { Parser<Void>.literal($0) }).map { _ in match }
     }
 }
 
 extension Parser where A == Void {
+    @inline(__always)
     public static let noDelimiter = always(())
 }
 
 extension Parser {
+    @inline(__always)
     public static func zeroOrMore<A>(_ parser: Parser<A>, delimiter: Parser<Void>) -> Parser<[A]> {
         return Parser<[A]> { str in
             var match: [A] = []
@@ -136,15 +151,18 @@ extension Parser {
         }
     }
 
+    @inline(__always)
     public static func delimitedZeroOrMore<A>(_ parser: Parser<A>) -> Parser<[A]> {
         let delimiter = zip(Parser<Void>.literal(","), Parser<Void>.emptyspace).map { _ in () }
         return zeroOrMore(parser, delimiter: delimiter)
     }
 
+    @inline(__always)
     public static func first<A>(_ parsers: Parser<A>...) -> Parser<A> {
         first(parsers)
     }
 
+    @inline(__always)
     public static func first<A>(_ parsers: [Parser<A>]) -> Parser<A> {
         return Parser<A> { str in
             for parser in parsers {
@@ -156,10 +174,12 @@ extension Parser {
         }
     }
 
+    @inline(__always)
     public static func longest<A>(_ parsers: Parser<A>...) -> Parser<A> {
         longest(parsers)
     }
 
+    @inline(__always)
     public static func longest<A>(_ parsers: [Parser<A>]) -> Parser<A> {
         return Parser<A> { str in
             let original = str
